@@ -25,6 +25,12 @@ export const items: Item[] = [
         privateRoles: [2]
     },
     {
+        title: 'My Projects',
+        path: '/dashboard/my-projects',
+        icon: <AssignmentIcon fontSize="small" />,
+        privateRoles: [1]
+    },
+    {
         title: 'About',
         path: '/dashboard/about',
         icon: <ContactMailIcon fontSize="small" />
