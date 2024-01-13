@@ -1,9 +1,28 @@
 const Project = require('../models/Project');
 const Team = require('../models/Team');
+const User = require('../models/User');
+const UserTeam = require('../models/UserTeam');
 
 const projectController = {
-    async getProjects(req, res) {
+    getProject: async (req, res) => {
+        const project = await Project.findByPk(req.params.id, {
+            include: [{
+                model: Team,
+                include: [{
+                    model: User
+                }]
+            }]
+        });
+
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        return res.status(200).json(project);
+    },
+    getProjects: async (req, res) => {
         if (req.user.roleId === 2) {
+            console.log("++++++++++++++++++");
             const projects = await Project.findAll({
                 where: { teacherId: req.user.id },
                 include: [{
@@ -11,17 +30,31 @@ const projectController = {
                 }]
             });
 
-            res.send(projects);
+            res.status(200).json(projects);
         } else {
-            const teams = await Team.findAll({
-                where: { userId: req.user.id }
+            console.log("------------------");
+            let projects = await Project.findAll({
+                include: [{
+                    model: Team,
+                    include: [{
+                        model: User,
+                    }]
+                }],
             });
+            
+            projects = projects.filter(project => {
+                for (const team of project.Teams) {
+                    for (const user of team.Users) {
+                        if (user.id === req.user.id) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            );
 
-            const projects = await Project.findAll({
-                where: { id: teams.map(team => team.projectId) }
-            });
-
-            res.send(projects);
+            res.status(200).json(projects);
         }
     },
     createProject: async (req, res) => {
