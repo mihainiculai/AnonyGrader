@@ -7,16 +7,16 @@ const Grade = sequelize.define('Grade', {
         autoIncrement: true,
         primaryKey: true
     },
+    grade: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
     deliverableId: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
     userId: {
         type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    Timestamp: {
-        type: DataTypes.DATE,
         allowNull: false
     },
 });

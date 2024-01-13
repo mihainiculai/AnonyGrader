@@ -7,8 +7,16 @@ const Deliverable = sequelize.define('Deliverable', {
         autoIncrement: true,
         primaryKey: true
     },
-    projectId: {
-        type: DataTypes.UUID,
+    title: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    details: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    teamId: {
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     dueDate: {

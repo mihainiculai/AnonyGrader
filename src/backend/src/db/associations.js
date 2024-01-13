@@ -16,7 +16,10 @@ Team.belongsTo(Project, { foreignKey: 'projectId' });
 Project.hasMany(Team, { foreignKey: 'projectId' });
 
 Deliverable.belongsTo(Team, { foreignKey: 'teamId' });
+Team.hasMany(Deliverable, { foreignKey: 'teamId' });
 
 Grade.belongsTo(Deliverable, { foreignKey: 'deliverableId' });
+Deliverable.hasMany(Grade, { foreignKey: 'deliverableId' });
 
 Grade.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Grade, { foreignKey: 'userId' });
