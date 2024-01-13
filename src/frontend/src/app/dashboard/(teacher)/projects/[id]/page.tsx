@@ -1,7 +1,6 @@
 "use client";
 import React from 'react';
-import Link from 'next/link';
-import { Unstable_Grid2 as Grid, Typography, Button, IconButton, SvgIcon, Tooltip, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Unstable_Grid2 as Grid, Typography, Button, IconButton, SvgIcon, Tooltip, Accordion, AccordionSummary, AccordionDetails, Avatar, Chip, Stack } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import swr from 'swr';
 import { fetcher } from '@/components/fetcher';
@@ -12,60 +11,54 @@ import { axiosInstance } from "@/components/axiosInstance";
 import { AxiosError } from "axios";
 import { useSnackbar } from "@/contexts/snackbar-context";
 import { ErrorResponse } from '@/types/error-response';
-import { ProjectModal } from './_components/ProjectModal';
-import GroupsIcon from '@mui/icons-material/Groups';
+import { TeamModal } from './_components/TeamModal';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const validationSchema = Yup.object({
     id: Yup.number(),
-    title: Yup.string().required('Title is required'),
-    description: Yup.string().required('Description is required'),
+    studentsId: Yup.array(),
+    projectId: Yup.number(),
 });
 
 interface Values {
     id?: number;
-    title: string;
-    description: string;
+    studentsId: number[];
+    projectId: number;
 }
 
-export default function Projects() {
-    const { data } = swr('/projects', fetcher);
+export default function Project({ params }: { params: { id: number } }) {
+    const { data: project } = swr(`/projects/${params.id}`, fetcher);
+    const { data: students } = swr(`/users/students`, fetcher);
 
     const { showSnackbar } = useSnackbar();
 
     const formik = useFormik({
         initialValues: {
             id: undefined,
-            title: "",
-            description: "",
+            studentsId: [],
+            projectId: params.id,
         },
         validationSchema,
         onSubmit: async (values: Values) => {
             try {
                 switch (action) {
                     case "add":
-                        await axiosInstance.post('/projects', {
-                            title: values.title,
-                            description: values.description,
-                        });
-                        showSnackbar("Project created", "success");
+                        await axiosInstance.post('/teams', values);
+                        showSnackbar("Team created", "success");
                         break;
                     case "edit":
-                        await axiosInstance.put(`/projects/${values.id}`, {
-                            title: values.title,
-                            description: values.description,
-                        });
-                        showSnackbar("Project updated", "success");
+                        await axiosInstance.put(`/teams/${values.id}`, values);
+                        showSnackbar("Team updated", "success");
                         break;
                     case "delete":
-                        await axiosInstance.delete(`/projects/${values.id}`);
-                        showSnackbar("Project deleted", "success");
+                        await axiosInstance.delete(`/teams/${values.id}`);
+                        showSnackbar("Team deleted", "success");
                         break;
                 }
 
-                mutate('/projects');
+                mutate(`/projects/${params.id}`);
                 handleClose();
             }
             catch (err) {
@@ -88,8 +81,7 @@ export default function Projects() {
 
         if (action === "edit" || action === "delete") {
             formik.setFieldValue('id', values.id);
-            formik.setFieldValue('title', values.title);
-            formik.setFieldValue('description', values.description);
+            formik.setFieldValue('studentsId', values.Users.map((student: any) => student.id));
         }
 
         setOpen(true);
@@ -104,7 +96,7 @@ export default function Projects() {
             <div>
                 <Grid container justifyContent={'space-between'}>
                     <Grid>
-                        <Typography variant="h4">Projects</Typography>
+                        <Typography variant="h4">{project?.title}</Typography>
                     </Grid>
                     <Grid>
                         <Button
@@ -119,34 +111,39 @@ export default function Projects() {
                                 handleOpen();
                             }}
                         >
-                            New Project
+                            New Team
                         </Button>
                     </Grid>
                 </Grid>
             </div>
             <div>
-                {data?.map((project: any) => (
-                    <Accordion key={project.id}>
+                {project?.Teams.map((team: any) => (
+                    <Accordion key={team.id}>
                         <AccordionSummary
                             expandIcon={<ExpandMoreIcon />}
                         >
                             <Grid container alignItems={'center'} justifyContent={'space-between'} xs={12}>
                                 <Grid xs={7}>
                                     <Typography variant="h6">
-                                        {project.title}
+                                        {team.teamName}
                                     </Typography>
+                                    <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                                        {team.Users.map((student: any) => (
+                                            <>
+                                                <Chip
+                                                    avatar={<Avatar />}
+                                                    label={student.name}
+                                                    variant="outlined"
+                                                    size="small"
+                                                />
+                                            </>
+                                        ))}
+                                    </Stack>
                                 </Grid>
                                 <Grid justifyContent={'flex-end'} container>
-                                    <Tooltip title="Teams">
-                                        <Link href={`/dashboard/projects/${project.id}`}>
-                                            <Button variant="outlined" startIcon={<GroupsIcon />} color="secondary" size="small" sx={{ mr: 2 }}>
-                                                {project.Teams.length}
-                                            </Button>
-                                        </Link>
-                                    </Tooltip>
                                     <Tooltip title="Edit">
                                         <IconButton
-                                            onClick={() => handleOpen("edit", project)}
+                                            onClick={() => handleOpen("edit", team)}
                                         >
                                             <SvgIcon fontSize="small" color="primary">
                                                 <EditIcon />
@@ -155,7 +152,7 @@ export default function Projects() {
                                     </Tooltip>
                                     <Tooltip title="Delete">
                                         <IconButton
-                                            onClick={() => handleOpen("delete", project)}
+                                            onClick={() => handleOpen("delete", team)}
                                         >
                                             <SvgIcon fontSize="small" color="error">
                                                 <DeleteIcon />
@@ -166,22 +163,18 @@ export default function Projects() {
                             </Grid>
                         </AccordionSummary>
                         <AccordionDetails>
-                            <Typography variant="h6">
-                                Description:
-                            </Typography>
-                            <Typography>
-                                {project.description}
-                            </Typography>
+
                         </AccordionDetails>
                     </Accordion>
                 ))}
             </div>
 
-            <ProjectModal
+            <TeamModal
                 open={open}
                 action={action}
                 handleClose={handleClose}
                 onSubmit={formik.handleSubmit}
+                students={students}
                 formik={formik}
             />
         </>
