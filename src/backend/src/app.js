@@ -8,6 +8,8 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const projectRoutes = require('./routes/projectRoutes');
+const teamRoutes = require('./routes/teamRoutes');
+const deliverableRoutes = require('./routes/deliverableRoutes');
 const gradeRoutes = require('./routes/gradeRoutes');
 
 const sequelize = require('./db/index');
@@ -25,7 +27,10 @@ app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', authenticate(), projectRoutes);
+app.use('/api/teams', authenticate(), teamRoutes);
 app.use('/api/users', authenticate(), userRoutes);
+app.use('/api/deliverables', authenticate(), deliverableRoutes);
+app.use('/api/grades', authenticate(), gradeRoutes);
 
 app.use((err, req, res, next) => {
     console.log('🚨 An error occurred')
