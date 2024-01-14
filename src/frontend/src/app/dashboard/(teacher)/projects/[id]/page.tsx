@@ -163,7 +163,99 @@ export default function Project({ params }: { params: { id: number } }) {
                             </Grid>
                         </AccordionSummary>
                         <AccordionDetails>
+                            <Grid container spacing={2} direction={'column'}>
+                                <Grid container spacing={2} alignItems={'center'}>
+                                    <Grid xs={12} md={3}>
+                                        <Typography variant="h6">
+                                            Project name:
+                                        </Typography>
+                                    </Grid>
+                                    <Grid xs={12} md={9}>
+                                        <Typography>
+                                            {team.projectName}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                                <Grid container spacing={2} alignItems={'center'}>
+                                    <Grid xs={12} md={3}>
+                                        <Typography variant="h6">
+                                            Project details:
+                                        </Typography>
+                                    </Grid>
+                                    <Grid xs={12} md={9}>
+                                        <Typography>
+                                            {team.projectDetails || "No details"}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                                <Grid container spacing={2}>
+                                    <Grid xs={12} md={3}>
+                                        <Typography variant="h6">
+                                            Deliverables:
+                                        </Typography>
+                                    </Grid>
+                                    <Grid xs={12} md={9}>
+                                        {team.Deliverables.map((deliverable: any) => (
+                                            <>
+                                                <Accordion key={deliverable.id}>
+                                                    <AccordionSummary
+                                                        expandIcon={<ExpandMoreIcon />}
+                                                    >
+                                                        <Grid container alignItems={'center'} justifyContent={'space-between'} xs={12}>
+                                                            <Grid xs={7}>
+                                                                <Typography variant="h6">
+                                                                    {deliverable.title}
+                                                                </Typography>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </AccordionSummary>
+                                                    <AccordionDetails>
+                                                        <Grid container spacing={2} direction={'column'}>
+                                                            <Grid container spacing={2} alignItems={'center'}>
+                                                                <Grid xs={12} md={3}>
+                                                                    <Typography variant="h6">
+                                                                        Details:
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid xs={12} md={9}>
+                                                                    <Typography>
+                                                                        {deliverable.details || "No details"}
+                                                                    </Typography>
+                                                                </Grid>
+                                                            </Grid>
+                                                            <Grid container spacing={2} alignItems={'center'}>
+                                                                <Grid xs={12} md={3}>
+                                                                    <Typography variant="h6">
+                                                                        Grade:
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid xs={12} md={9}>
+                                                                    <Typography>
+                                                                        {deliverable.grade || "-"} / 10
+                                                                    </Typography>
+                                                                </Grid>
+                                                            </Grid>
+                                                            <Grid container spacing={2} alignItems={'center'}>
+                                                                <Grid xs={12} md={3}>
+                                                                    <Typography variant="h6">
+                                                                        Votes:
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid xs={12} md={9}>
+                                                                    <Typography>
+                                                                        {deliverable.gradeCount || "0"} / {deliverable.gradeCountTotal || "-"}
+                                                                    </Typography>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </AccordionDetails>
+                                                </Accordion>
+                                            </>
+                                        ))}
+                                    </Grid>
+                                </Grid>
 
+                            </Grid>
                         </AccordionDetails>
                     </Accordion>
                 ))}

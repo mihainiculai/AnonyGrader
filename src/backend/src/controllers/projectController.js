@@ -2,6 +2,8 @@ const Project = require('../models/Project');
 const Team = require('../models/Team');
 const User = require('../models/User');
 const UserTeam = require('../models/UserTeam');
+const Deliverable = require('../models/Deliverable');
+const Grade = require('../models/Grade');
 
 const projectController = {
     getProject: async (req, res) => {
@@ -10,6 +12,12 @@ const projectController = {
                 model: Team,
                 include: [{
                     model: User
+                },
+                {
+                    model: Deliverable,
+                    include: [{
+                        model: Grade
+                    }]
                 }]
             }]
         });
@@ -18,11 +26,28 @@ const projectController = {
             return res.status(404).json({ message: 'Project not found' });
         }
 
+        for (const team of project.Teams) {
+            for (const deliverable of team.Deliverables) {
+                let sum = 0;
+                let count = 0;
+                let countNotNull = 0;
+                for (const grade of deliverable.Grades) {
+                    if (grade.grade !== null) {
+                        sum += grade.grade;
+                        countNotNull++;
+                    }
+                    count++;
+                }
+                deliverable.dataValues.grade = parseFloat((sum / countNotNull).toFixed(2));
+                deliverable.dataValues.gradeCountTotal = count;
+                deliverable.dataValues.gradeCount = countNotNull;
+            }
+        }
+
         return res.status(200).json(project);
     },
     getProjects: async (req, res) => {
         if (req.user.roleId === 2) {
-            console.log("++++++++++++++++++");
             const projects = await Project.findAll({
                 where: { teacherId: req.user.id },
                 include: [{
@@ -32,7 +57,6 @@ const projectController = {
 
             res.status(200).json(projects);
         } else {
-            console.log("------------------");
             let projects = await Project.findAll({
                 include: [{
                     model: Team,
@@ -41,7 +65,7 @@ const projectController = {
                     }]
                 }],
             });
-            
+
             projects = projects.filter(project => {
                 for (const team of project.Teams) {
                     for (const user of team.Users) {

@@ -8,6 +8,7 @@ const Grade = require('../models/Grade');
 const teamController = {
     getTeamByProjectId: async (req, res) => {
         const { id } = req.params;
+        const userId = req.user.id;
 
         const project = await Project.findByPk(id);
 
@@ -15,30 +16,29 @@ const teamController = {
             return res.status(404).json({ message: 'Project not found' });
         }
 
-        const team = await Team.findOne({
+        const teamFind = await Team.findOne({
             where: { projectId: id },
             include: [
                 {
-                    model: Project,
-                    include: [
-                        {
-                            model: User,
-                        }
-                    ]
+                    model: User,
+                    where: { id: userId }
                 },
+            ]
+        });
+
+        const team = await Team.findByPk(teamFind.id, {
+            include: [
                 {
                     model: User,
+                },
+                {
+                    model: Project
                 },
                 {
                     model: Deliverable,
                     include: [
                         {
                             model: Grade,
-                            include: [
-                                {
-                                    model: User
-                                }
-                            ]
                         }
                     ]
                 }
@@ -56,7 +56,7 @@ const teamController = {
         const team = new Team({
             projectId
         });
-        
+
         const savedTeam = await team.save();
 
         studentsId.forEach(studentId => {
