@@ -138,6 +138,7 @@ export default function Login() {
                     <FormControl component="fieldset">
                         <FormLabel component="legend">Role</FormLabel>
                         <RadioGroup
+                            row
                             aria-label="role"
                             name="role"
                             value={formik.values.role}
